@@ -1,0 +1,17 @@
+/node_modules
+/.next
+/out
+/build
+.DS_Store
+*.pem
+.env*.local
+.env
+npm-debug.log*
+next-env.d.ts
+.vercel
+*.tsbuildinfo
+
+# local agent / tooling artifacts
+.playwright-mcp/
+.claude/
+01-initial.png

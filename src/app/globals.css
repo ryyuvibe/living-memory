@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0b0d10;
+  --panel: #14181d;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: #e8eaed;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* subtle scrollbar for the belief column */
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: #2a3038;
+  border-radius: 8px;
+}
