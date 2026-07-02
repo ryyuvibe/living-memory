@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Belief, InferencePrompt, ParsedInteraction } from "@/lib/types";
+import {
+  Belief,
+  Feature,
+  FEATURE_LABEL,
+  FEATURES,
+  InferencePrompt,
+  ParsedInteraction,
+} from "@/lib/types";
 import {
   applyInteraction,
   confirmInference,
@@ -18,6 +25,7 @@ import { buildSeedQueue } from "@/lib/seeds";
 import { localParse } from "@/lib/localParser";
 import { InputPanel } from "@/components/InputPanel";
 import { LivingModel } from "@/components/LivingModel";
+import { FactSlot, MemoryTodayPanel } from "@/components/MemoryTodayPanel";
 
 // When no LLM is configured we parse locally in the browser — no network hop,
 // so "next interaction" feels instant. Set NEXT_PUBLIC_USE_LLM=1 to route
@@ -32,6 +40,11 @@ interface LogEntry {
 
 export default function Home() {
   const [beliefs, setBeliefs] = useState<Belief[]>(initialBeliefs);
+  // "Memory today" cabinet: ONE note per feature slot, overwritten by the latest
+  // signal. The contrast to beliefs — recency wins, history is silently lost.
+  const [slots, setSlots] = useState<Record<Feature, FactSlot | undefined>>(
+    {} as Record<Feature, FactSlot | undefined>
+  );
   const [log, setLog] = useState<LogEntry[]>([]);
   // a fresh shuffled queue per session (fixed opener arc, then shuffled pool)
   const [seeds, setSeeds] = useState<string[]>(buildSeedQueue);
@@ -41,7 +54,7 @@ export default function Home() {
   const [inference, setInference] = useState<InferencePrompt | null>(null);
   // virtual clock: starts now, advances when you press "let time pass"
   const clock = useRef<number>(Date.now());
-  // monotonic id source for log rows -> stable React keys (no re-render churn)
+  // monotonic id source for stable log keys (no re-render churn)
   const logId = useRef(0);
 
   // Commit a parsed interaction to state. Pure state writes — no awaiting.
@@ -52,6 +65,25 @@ export default function Home() {
       // Defer the inference check out of the reducer: calling another state
       // setter mid-update forces an extra render pass. Schedule it instead.
       queueMicrotask(() => maybeRaiseInference(next, setInference));
+      return next;
+    });
+    // The cabinet, fed by the SAME parsed signals: OVERWRITE one note per
+    // feature slot. The latest signal replaces whatever was there — no count,
+    // no consistency, no provenance. A contradicting signal silently wipes the
+    // old note (we stash it as `prev` only to flash what was lost). That
+    // recency-only overwrite is the failure the living model answers.
+    setSlots((prev) => {
+      const next = { ...prev };
+      for (const d of parsed.feature_deltas) {
+        const text = flatFact(d.feature, d.dir);
+        const before = prev[d.feature];
+        next[d.feature] = {
+          feature: d.feature,
+          text,
+          prev: before && before.text !== text ? before.text : null,
+          updatedAt: now,
+        };
+      }
       return next;
     });
     // Keep only the most recent rows in the visible log. Older interactions have
@@ -99,6 +131,7 @@ export default function Home() {
   const reset = useCallback(() => {
     clock.current = Date.now();
     setBeliefs(initialBeliefs());
+    setSlots({} as Record<Feature, FactSlot | undefined>);
     setLog([]);
     setSeeds(buildSeedQueue());
     setSeedIdx(0);
@@ -107,10 +140,15 @@ export default function Home() {
   }, []);
 
   const held = useMemo(() => beliefs.filter(isHeld), [beliefs]);
+  // Cabinet rows in stable Salt·Fat·Acid·Heat order, only the filled slots.
+  const slotRows = useMemo(
+    () => FEATURES.map((f) => slots[f]).filter((s): s is FactSlot => !!s),
+    [slots]
+  );
 
   return (
     <main className="min-h-screen w-full px-5 py-8 lg:px-10">
-      <header className="mx-auto mb-8 max-w-6xl">
+      <header className="mx-auto mb-8 max-w-7xl">
         <h1 className="text-lg font-semibold tracking-tight text-neutral-100">
           Living Memory
         </h1>
@@ -119,11 +157,14 @@ export default function Home() {
           maintain. A better memory is a{" "}
           <span className="text-neutral-200">living model</span> — it holds an
           impression with confidence, corrects itself in the flow, and forgets
-          what&apos;s stale on its own.
+          what&apos;s stale on its own. Feed the same interactions to both and
+          watch them diverge.
         </p>
       </header>
 
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-[340px_1fr]">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        {/* Top row, full width: the input controls — cooking interaction and
+            the clock sit side by side, with the "what it heard" log beneath. */}
         <InputPanel
           onSubmit={feed}
           onNextSeed={nextSeed}
@@ -135,24 +176,38 @@ export default function Home() {
           log={log}
         />
 
-        <LivingModel
-          beliefs={held}
-          allBeliefs={beliefs}
-          inference={inference}
-          daysElapsed={daysElapsed}
-          onSetLean={(f, v) => setBeliefs((b) => setLean(b, f, v))}
-          onDowngrade={(f) => setBeliefs((b) => downgrade(b, f))}
-          onDelete={(f) => setBeliefs((b) => deleteBelief(b, f))}
-          onTogglePin={(f) => setBeliefs((b) => togglePin(b, f))}
-          onConfirmInference={(f) => {
-            setBeliefs((b) => confirmInference(b, f));
-            setInference(null);
-          }}
-          onDismissInference={() => setInference(null)}
-        />
+        {/* Bottom row: the two memories, side by side, fed by the same signals.
+            Cabinet left, living model right — stacks on narrow screens. */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <MemoryTodayPanel slots={slotRows} />
+
+          <LivingModel
+            beliefs={held}
+            allBeliefs={beliefs}
+            inference={inference}
+            daysElapsed={daysElapsed}
+            onSetLean={(f, v) => setBeliefs((b) => setLean(b, f, v))}
+            onDowngrade={(f) => setBeliefs((b) => downgrade(b, f))}
+            onDelete={(f) => setBeliefs((b) => deleteBelief(b, f))}
+            onTogglePin={(f) => setBeliefs((b) => togglePin(b, f))}
+            onConfirmInference={(f) => {
+              setBeliefs((b) => confirmInference(b, f));
+              setInference(null);
+            }}
+            onDismissInference={() => setInference(null)}
+          />
+        </div>
       </div>
     </main>
   );
+}
+
+// A parsed delta -> one flat fact string for the cabinet slot.
+// "+" -> "likes salt"; "-" -> "avoids heat". No confidence, no provenance —
+// just the latest note, which overwrites whatever the slot held before.
+function flatFact(feature: Belief["feature"], dir: "+" | "-"): string {
+  const verb = dir === "+" ? "likes" : "avoids";
+  return `${verb} ${FEATURE_LABEL[feature]}`;
 }
 
 // Surface an inference for confirmation when a belief is moderately formed but

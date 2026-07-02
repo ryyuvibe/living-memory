@@ -23,6 +23,18 @@ const STEP_SCALE = 0.15;
 // Revealed behavior counts harder than stated critique.
 const REVEALED_BOOST = 1.4;
 
+// Plasticity: how much a belief yields to a new signal as a function of how sure
+// the model currently is. A belief held with high confidence is "set" — it
+// barely moves; a soft, low-confidence one (freshly formed, or loosened by
+// decay) moves a lot. This is the mechanism that lets a chef's faded impression
+// be reshaped quickly by one new visit, while a well-grounded one holds. Maps
+// confidence 0 -> PLASTIC_MAX, confidence 1 -> PLASTIC_MIN.
+const PLASTIC_MAX = 1.6; // unsure belief: a new signal moves it ~1.6×
+const PLASTIC_MIN = 0.5; // set belief: a new signal moves it ~0.5×
+function plasticity(confidence: number): number {
+  return PLASTIC_MAX - (PLASTIC_MAX - PLASTIC_MIN) * clamp01(confidence);
+}
+
 export function emptyBelief(feature: Feature): Belief {
   return {
     feature,
@@ -75,7 +87,10 @@ export function applyInteraction(
 
     const before = b.lean;
     const weight = d.confidence * (d.revealed ? REVEALED_BOOST : 1);
-    const step = STEP_SCALE * weight;
+    // Scale the step by current plasticity: a low-confidence belief (new, or
+    // loosened by decay) yields more to this signal than a well-grounded one.
+    // Uses confidence BEFORE this signal updates it (recomputed below).
+    const step = STEP_SCALE * weight * plasticity(b.confidence);
     const signed = d.dir === "+" ? step : -step;
 
     b.lean = clampLean(b.lean + signed);
@@ -120,16 +135,13 @@ function flipReason(d: FeatureDelta, b: Belief): string {
   return `you used to ${usedTo} → updated, ${phrase}`;
 }
 
-// Fraction of an established lean that survives forgetting. Taste leaves a mark:
-// even once the model has lost all CONFIDENCE in a preference, the SHAPE keeps a
-// faint imprint of which way you leaned — it contracts toward this floor, never
-// all the way to neutral. (Confidence is what terminates at zero.)
-const LEAN_RETAINED_FLOOR = 0.45;
-
-// Designed forgetting: age every UNPINNED belief. Confidence decays toward 0 the
-// longer it goes unreinforced. Lean contracts toward a retained floor — a faint
-// persistent imprint of the established preference — rather than collapsing to a
-// zero'd-out neutral. Pinned beliefs are protected.
+// Designed forgetting, the way a chef forgets: the SHAPE of your taste stays put
+// — they still remember you ran acid-forward — but their CONFIDENCE in it fades
+// the longer it goes unreinforced. Lean is untouched; only confidence decays
+// toward 0. The payoff lands in applyInteraction: a low-confidence belief is
+// soft, so the next signal moves it much more than it would a well-grounded one.
+// Time doesn't rewrite the preference; it just loosens the model's grip on it.
+// Pinned beliefs are protected from decay entirely.
 export function decayBeliefs(beliefs: Belief[], now: number = Date.now()): Belief[] {
   return beliefs.map((b) => {
     if (b.pinned || b.signals === 0) return { ...b, justFlipped: null };
@@ -137,13 +149,9 @@ export function decayBeliefs(beliefs: Belief[], now: number = Date.now()): Belie
     if (ageDays < 0.001) return { ...b, justFlipped: null };
     const lost = DECAY_PER_DAY * ageDays;
     const confidence = clamp01(b.confidence - lost);
-    // How far we've slid toward the floor (0 = fresh, 1 = fully forgotten).
-    const slide = Math.min(1, lost * 0.8);
-    // Contract lean toward a retained fraction of itself, not toward 0. A strong
-    // preference keeps a visible imprint forever; only its solidity fades.
-    const floor = b.lean * LEAN_RETAINED_FLOOR;
-    const lean = clampLean(b.lean + (floor - b.lean) * slide);
-    return { ...b, confidence, lean, justFlipped: null };
+    // Lean is preserved — the impression of which way you leaned survives even
+    // as the model grows unsure of it. Only solidity fades.
+    return { ...b, confidence, justFlipped: null };
   });
 }
 

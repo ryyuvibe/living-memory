@@ -25,83 +25,89 @@ export function BeliefCard({
   const faded = !b.pinned && b.confidence < 0.2;
   const conf = Math.round(b.confidence * 100);
 
+  // At rest each card is a single dense row: the lean word, an inline
+  // confidence bar, and the confidence word. The provenance line, contradiction
+  // announcement, and the adjust controls only unfold when the row is expanded
+  // — halving the resting height so four cards don't overrun the column.
   return (
     <div
-      className={`rounded-lg border p-3 transition-all duration-500 ${
+      className={`rounded-lg border transition-all duration-500 ${
         b.justFlipped
           ? "animate-flipIn border-violet-700/60 bg-violet-950/20"
           : "border-neutral-800 bg-neutral-950/40"
       } ${faded ? "opacity-50" : "opacity-100"}`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-neutral-100">
-              {leanWord(b)}
-            </span>
-            {b.pinned && (
-              <span className="rounded bg-amber-900/40 px-1.5 py-0.5 text-[10px] text-amber-300">
-                pinned
-              </span>
-            )}
-          </div>
-          {/* confidence + provenance: how sure, and why */}
-          <div className="mt-0.5 text-xs text-neutral-400">
-            {confidenceWord(b.confidence)}{" "}
-            <span className="text-neutral-600">
-              ({b.signals} signal{b.signals === 1 ? "" : "s"})
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={onTogglePin}
-            title={b.pinned ? "Unpin" : "Pin to protect from decay"}
-            className={`rounded px-1.5 py-0.5 text-xs transition ${
-              b.pinned
-                ? "text-amber-300 hover:text-amber-200"
-                : "text-neutral-600 hover:text-neutral-300"
-            }`}
-          >
-            {b.pinned ? "★" : "☆"}
-          </button>
-          <button
-            onClick={() => setEditing((e) => !e)}
-            className="rounded px-1.5 py-0.5 text-xs text-neutral-500 transition hover:text-neutral-200"
-          >
-            {editing ? "done" : "adjust"}
-          </button>
-        </div>
-      </div>
-
-      {/* confidence bar */}
-      <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${
-            b.confidence >= 0.7
-              ? "bg-emerald-500"
-              : b.confidence >= 0.4
-                ? "bg-amber-500"
-                : "bg-neutral-500"
-          }`}
-          style={{ width: `${conf}%` }}
-        />
-      </div>
-
-      {/* contradiction flip announcement */}
-      {b.justFlipped && (
-        <div className="mt-2.5 text-xs leading-relaxed text-violet-200">
-          ↻ {b.justFlipped.reason}
-          <span className="ml-1 text-neutral-500">
-            ({fmt(b.justFlipped.fromLean)} → {fmt(b.justFlipped.toLean)})
+      {/* dense header row — click anywhere to expand */}
+      <button
+        onClick={() => setEditing((e) => !e)}
+        className="flex w-full items-center gap-3 px-3 py-2 text-left"
+      >
+        <span className="flex min-w-0 shrink-0 items-center gap-1.5">
+          <span className="truncate text-sm font-medium text-neutral-100">
+            {leanWord(b)}
           </span>
-        </div>
-      )}
+          {b.pinned && (
+            <span className="rounded bg-amber-900/40 px-1 py-0.5 text-[9px] text-amber-300">
+              pinned
+            </span>
+          )}
+          {b.justFlipped && <span className="text-xs text-violet-300">↻</span>}
+        </span>
 
-      {/* in-flow correction controls */}
+        {/* inline confidence bar takes the middle */}
+        <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-800">
+          <span
+            className={`block h-full rounded-full transition-all duration-500 ${
+              b.confidence >= 0.7
+                ? "bg-emerald-500"
+                : b.confidence >= 0.4
+                  ? "bg-amber-500"
+                  : "bg-neutral-500"
+            }`}
+            style={{ width: `${conf}%` }}
+          />
+        </span>
+
+        <span className="shrink-0 text-[11px] tabular-nums text-neutral-500">
+          {confidenceWord(b.confidence)}
+        </span>
+        <span className="shrink-0 text-xs text-neutral-600">
+          {editing ? "−" : "+"}
+        </span>
+      </button>
+
+      {/* expanded detail: provenance, flip reason, in-flow controls */}
       {editing && (
-        <div className="mt-3 border-t border-neutral-800 pt-3">
+        <div className="border-t border-neutral-800 px-3 pb-3 pt-2.5">
+          <div className="mb-2.5 flex items-center justify-between gap-2 text-xs text-neutral-400">
+            <span>
+              {confidenceWord(b.confidence)}{" "}
+              <span className="text-neutral-600">
+                ({b.signals} signal{b.signals === 1 ? "" : "s"})
+              </span>
+            </span>
+            <button
+              onClick={onTogglePin}
+              title={b.pinned ? "Unpin" : "Pin to protect from decay"}
+              className={`rounded px-1.5 py-0.5 text-xs transition ${
+                b.pinned
+                  ? "text-amber-300 hover:text-amber-200"
+                  : "text-neutral-600 hover:text-neutral-300"
+              }`}
+            >
+              {b.pinned ? "★ pinned" : "☆ pin"}
+            </button>
+          </div>
+
+          {b.justFlipped && (
+            <div className="mb-2.5 text-xs leading-relaxed text-violet-200">
+              ↻ {b.justFlipped.reason}
+              <span className="ml-1 text-neutral-500">
+                ({fmt(b.justFlipped.fromLean)} → {fmt(b.justFlipped.toLean)})
+              </span>
+            </div>
+          )}
+
           <label className="flex items-center gap-3 text-xs text-neutral-500">
             <span className="w-10 shrink-0">lean</span>
             <input
