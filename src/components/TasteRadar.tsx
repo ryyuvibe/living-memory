@@ -10,12 +10,12 @@ interface Props {
 // Angles in radians, measured clockwise from straight up.
 // Drawing box is wider than tall so the left/right axis labels ("HEAT", "FAT")
 // have room and don't clip at the edges.
-const W = 300;
-const H = 248;
+const W = 228;
+const H = 188;
 const CX = W / 2;
 const CY = H / 2;
-const R_MAX = 92; // outer ring radius (lean = +1)
-const R_BASE = 46; // population-default ring (lean = 0)
+const R_MAX = 70; // outer ring radius (lean = +1)
+const R_BASE = 35; // population-default ring (lean = 0)
 
 // FEATURES is ["salt", "fat", "acid", "spice"]; place them clockwise from top.
 const ANGLE: Record<Feature, number> = {
@@ -57,14 +57,14 @@ export function TasteRadar({ beliefs }: Props) {
   }).join(" ");
 
   // concentric guide rings (diamonds) at a few radii
-  const rings = [R_MAX, (R_MAX + R_BASE) / 2 + 11, R_BASE, R_BASE / 2].map((r) =>
+  const rings = [R_MAX, (R_MAX + R_BASE) / 2 + 8, R_BASE, R_BASE / 2].map((r) =>
     FEATURES.map((f) => pt(f, r).map((n) => n.toFixed(1)).join(",")).join(" ")
   );
 
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      className="mx-auto block h-[248px] w-[300px] max-w-full"
+      className="mx-auto block h-[188px] w-[228px] max-w-full"
       role="img"
       aria-label="Taste profile radar: salt, fat, acid, heat"
     >
@@ -147,7 +147,7 @@ export function TasteRadar({ beliefs }: Props) {
 
       {/* axis labels */}
       {FEATURES.map((f) => {
-        const [x, y] = pt(f, R_MAX + 22);
+        const [x, y] = pt(f, R_MAX + 18);
         return (
           <text
             key={f}

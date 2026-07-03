@@ -33,7 +33,7 @@ interface Props {
 
 export function MemoryTodayPanel({ slots }: Props) {
   return (
-    <section className="flex flex-col rounded-xl border border-neutral-800 bg-[var(--panel)] p-5">
+    <section className="flex flex-col rounded-xl border border-neutral-800 bg-[var(--panel)] p-3">
       <div className="mb-1 flex items-baseline justify-between">
         <h2 className="text-sm font-semibold tracking-tight text-neutral-300">
           Memory today
@@ -42,11 +42,9 @@ export function MemoryTodayPanel({ slots }: Props) {
           one flat fact per slot
         </span>
       </div>
-      <p className="mb-4 text-xs leading-relaxed text-neutral-500">
-        One note per slot, overwritten by the latest signal. A contradiction
-        doesn&apos;t pile up — it silently replaces the old note, with no record
-        it ever changed. No confidence, no count, no why. This is the current
-        norm across assistants, ChatGPT included.
+      <p className="mb-2 text-xs leading-relaxed text-neutral-500">
+        One note per slot, overwritten by the latest signal — no confidence, no
+        count, no why.
       </p>
 
       {slots.length === 0 ? (
@@ -63,7 +61,7 @@ export function MemoryTodayPanel({ slots }: Props) {
       )}
 
       {slots.length > 0 && (
-        <p className="mt-4 border-t border-neutral-800 pt-3 text-[11px] leading-relaxed text-neutral-600">
+        <p className="mt-2 border-t border-neutral-800 pt-2 text-[11px] leading-relaxed text-neutral-600">
           Whatever you said last wins — one outlier overwrites a season of
           habit, and the cabinet never knows it contradicted itself.
         </p>

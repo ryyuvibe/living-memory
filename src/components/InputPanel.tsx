@@ -80,8 +80,8 @@ export function InputPanel({
       {/* Column 1: cooking interaction — where you feed the model. The primary
           demo CTA ("Next interaction") leads on top; the custom-input submodule
           sits below it as the secondary, self-contained escape hatch. */}
-      <div className="rounded-xl border border-neutral-800 bg-[var(--panel)] p-4">
-        <div className="mb-2 text-xs uppercase tracking-wider text-neutral-500">
+      <div className="rounded-xl border border-neutral-800 bg-[var(--panel)] p-3">
+        <div className="mb-1.5 text-xs uppercase tracking-wider text-neutral-500">
           Cooking interaction
         </div>
 
@@ -96,7 +96,7 @@ export function InputPanel({
         </button>
 
         {/* Divider — "or write your own" marks the drop to the secondary path. */}
-        <div className="my-3 flex items-center gap-2 text-[11px] text-neutral-600">
+        <div className="my-2 flex items-center gap-2 text-[11px] text-neutral-600">
           <span className="h-px flex-1 bg-neutral-800" />
           or write your own
           <span className="h-px flex-1 bg-neutral-800" />
@@ -113,7 +113,7 @@ export function InputPanel({
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit();
             }}
-            rows={2}
+            rows={1}
             placeholder='e.g. "reached for the chili crisp again"'
             className="w-full resize-none rounded-t-lg bg-transparent p-3 text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none"
           />
@@ -131,9 +131,8 @@ export function InputPanel({
           </div>
         </div>
 
-        <p className="mt-2 text-[11px] leading-relaxed text-neutral-600">
-          Each line is parsed into taste signals — revealed behavior counts for
-          more than stated critique.
+        <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-600">
+          Revealed behavior counts for more than stated critique.
         </p>
       </div>
 
@@ -175,8 +174,8 @@ export function InputPanel({
 
       {/* Column 3: the clock — the "let time pass" lever. Flex column so the big
           square CTA can stretch (flex-1) into the vertical negative space. */}
-      <div className="flex flex-col rounded-xl border border-neutral-800 bg-[var(--panel)] p-4">
-        <div className="mb-2 flex items-center justify-between">
+      <div className="flex flex-col rounded-xl border border-neutral-800 bg-[var(--panel)] p-3">
+        <div className="mb-1.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <PixelIcon name="clock" size={18} />
             <div className="text-xs uppercase tracking-wider text-neutral-500">
@@ -187,7 +186,7 @@ export function InputPanel({
             day {daysElapsed}
           </span>
         </div>
-        <p className="mb-3 text-[11px] leading-relaxed text-neutral-500">
+        <p className="mb-2 text-[11px] leading-relaxed text-neutral-500">
           Beliefs you don&apos;t reinforce fade on their own. Pinned beliefs are
           protected.
         </p>
@@ -198,9 +197,9 @@ export function InputPanel({
         <button
           onClick={onLetTimePass}
           disabled={busy}
-          className="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-neutral-700 bg-neutral-950/40 px-3 py-5 text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-900/60 disabled:opacity-40"
+          className="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-950/40 px-3 py-3 text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-900/60 disabled:opacity-40"
         >
-          <PixelIcon name="clock" size={56} />
+          <PixelIcon name="clock" size={40} />
           <span className="text-[11px] uppercase tracking-wide text-neutral-500">
             Let time pass
             <span className="ml-1 text-neutral-600">+4 days</span>

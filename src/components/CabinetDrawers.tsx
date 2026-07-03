@@ -22,7 +22,7 @@ function Drawer({ feature, slot }: { feature: Feature; slot: FactSlot | undefine
     <div className="flex flex-1 items-stretch gap-2">
       {/* drawer face */}
       <div
-        className={`flex flex-1 items-center gap-3 rounded-md border bg-gradient-to-b px-4 py-4 ${
+        className={`flex flex-1 items-center gap-3 rounded-md border bg-gradient-to-b px-3 py-2.5 ${
           filled
             ? "border-neutral-700 from-neutral-800/70 to-neutral-900/70"
             : "border-neutral-800 from-neutral-900/40 to-neutral-950/40"
@@ -60,13 +60,13 @@ function Drawer({ feature, slot }: { feature: Feature; slot: FactSlot | undefine
 export function CabinetDrawers({ slots }: { slots: FactSlot[] }) {
   const byFeature = new Map(slots.map((s) => [s.feature, s]));
   return (
-    <div className="flex h-full flex-col rounded-lg border border-neutral-800 bg-neutral-950/40 p-3">
-      <div className="flex flex-1 flex-col gap-2">
+    <div className="flex h-full flex-col rounded-lg border border-neutral-800 bg-neutral-950/40 p-2">
+      <div className="flex flex-1 flex-col gap-1.5">
         {FEATURES.map((f) => (
           <Drawer key={f} feature={f} slot={byFeature.get(f)} />
         ))}
       </div>
-      <p className="mt-3 text-center text-[11px] leading-relaxed text-neutral-600">
+      <p className="mt-2 text-center text-[11px] leading-relaxed text-neutral-600">
         one card per drawer · the newest replaces whatever was filed
       </p>
     </div>

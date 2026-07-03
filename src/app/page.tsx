@@ -147,22 +147,21 @@ export default function Home() {
   );
 
   return (
-    <main className="min-h-screen w-full px-5 py-8 lg:px-10">
-      <header className="mx-auto mb-8 max-w-7xl">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-100">
+    <main className="min-h-screen w-full px-5 py-4 lg:px-10">
+      <header className="mx-auto mb-4 max-w-7xl">
+        <h1 className="text-base font-semibold tracking-tight text-neutral-100">
           Living Memory
         </h1>
-        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-neutral-400">
-          Today&apos;s AI memory is a filing cabinet of flat facts you have to
-          maintain. A better memory is a{" "}
+        <p className="mt-0.5 max-w-3xl text-xs leading-relaxed text-neutral-400">
+          Today&apos;s AI memory is a filing cabinet of flat facts you maintain.
+          A better memory is a{" "}
           <span className="text-neutral-200">living model</span> — it holds an
           impression with confidence, corrects itself in the flow, and forgets
-          what&apos;s stale on its own. Feed the same interactions to both and
-          watch them diverge.
+          what&apos;s stale on its own. Feed both and watch them diverge.
         </p>
       </header>
 
-      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4">
         {/* Top row, full width: the input controls — cooking interaction and
             the clock sit side by side, with the "what it heard" log beneath. */}
         <InputPanel
@@ -178,7 +177,7 @@ export default function Home() {
 
         {/* Bottom row: the two memories, side by side, fed by the same signals.
             Cabinet left, living model right — stacks on narrow screens. */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <MemoryTodayPanel slots={slotRows} />
 
           <LivingModel

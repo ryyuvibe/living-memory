@@ -29,7 +29,7 @@ export function LivingModel({
   onDismissInference,
 }: Props) {
   return (
-    <section className="rounded-xl border border-amber-900/40 bg-gradient-to-b from-[var(--panel)] to-neutral-950/40 p-5">
+    <section className="rounded-xl border border-amber-900/40 bg-gradient-to-b from-[var(--panel)] to-neutral-950/40 p-3">
       <div className="mb-1 flex items-baseline justify-between">
         <h2 className="text-sm font-semibold tracking-tight text-amber-200">
           Living model
@@ -38,29 +38,21 @@ export function LivingModel({
           an impression, held with confidence
         </span>
       </div>
-      <p className="mb-4 text-xs leading-relaxed text-neutral-500">
-        Each belief shows how sure it is and why. Confidence is grounded in the
-        count and consistency of signals — not the model guessing at its own
-        certainty. It surfaces its own impression and invites the fix, in the
-        flow — no monthly settings panel to go prune.
+      <p className="mb-2 text-xs leading-relaxed text-neutral-500">
+        Each belief shows how sure it is and why — correctable in the flow.
       </p>
 
       {/* taste-profile radar: salt · fat · acid · heat, shape = lean,
           solidity = confidence */}
-      <div className="mb-4 rounded-lg border border-neutral-800 bg-neutral-950/40 py-3">
+      <div className="mb-2 rounded-lg border border-neutral-800 bg-neutral-950/40 py-1.5">
         <TasteRadar beliefs={allBeliefs} />
-        <p className="mt-1 text-center text-[11px] text-neutral-600">
-          shape = preference · solidity = confidence
-        </p>
-        <p className="mt-1 px-3 text-center text-[11px] leading-relaxed text-neutral-600">
-          It forgets on purpose: unreinforced beliefs fade, and a conclusion
-          your behavior contradicts gets let go — so the shape stays the
-          current you.
+        <p className="mt-0.5 px-3 text-center text-[11px] leading-relaxed text-neutral-600">
+          shape = preference · solidity = confidence · fades unless reinforced.
         </p>
       </div>
 
       {inference && (
-        <div className="mb-4 animate-flipIn rounded-lg border border-sky-800/60 bg-sky-950/30 p-3">
+        <div className="mb-2 animate-flipIn rounded-lg border border-sky-800/60 bg-sky-950/30 p-3">
           <div className="text-xs text-sky-200">{inference.question}</div>
           <div className="mt-2 flex gap-2">
             <button
@@ -84,7 +76,7 @@ export function LivingModel({
           No beliefs yet. Feed an interaction and watch an impression form.
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {beliefs.map((b) => (
             <BeliefCard
               key={b.feature}
