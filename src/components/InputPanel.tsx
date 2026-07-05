@@ -144,7 +144,7 @@ export function InputPanel({
           Capping the panel (not the list) was the earlier bug — it shortened
           the panel below the row and reopened the gap. On mobile it spans full
           width beneath the two control cards. */}
-      <div className="relative min-h-[16rem] rounded-xl border border-neutral-800 bg-[var(--panel)] lg:min-h-0">
+      <div className="relative h-64 rounded-xl border border-neutral-800 bg-[var(--panel)] lg:h-auto lg:min-h-0">
         {/* On lg the inner content is absolutely positioned to fill the panel —
             this removes the (growing) log from the grid row's intrinsic-size
             calculation entirely, so Columns 1 & 3 alone set the row height and
@@ -153,7 +153,9 @@ export function InputPanel({
             On mobile the grid is a single column with no sibling row to stretch
             against, so an absolute panel would collapse to 0px and vanish —
             there the content stays in normal flow (h-full) and the panel's own
-            min-h gives it a real, visible height. */}
+            FIXED height (h-64) bounds it: a growing log scrolls inside instead
+            of driving the panel taller. A min-h here would let it grow without
+            limit — the bug this replaced. */}
         <div className="flex h-full flex-col p-4 lg:absolute lg:inset-0">
           <div className="mb-2 text-xs uppercase tracking-wider text-neutral-500">
             What it heard
